@@ -87,3 +87,4 @@ ops/certs/*
 
 .vscode/
 main/server
+config.yaml
