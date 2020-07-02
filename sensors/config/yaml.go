@@ -18,10 +18,17 @@ type DatabaseConfig struct {
 	DBName   string `yaml:"dbname"`
 }
 
+//ServerConfig has server configuration options
+type ServerConfig struct {
+	Port string `yaml:"port"`
+}
+
 //YamlConfig maps the configuration in the yaml file
 //into a struct
 type YamlConfig struct {
 	Database DatabaseConfig `yaml:"database"`
+
+	Server ServerConfig `yaml:"server"`
 
 	AppSecret string `yaml::app_secret_key`
 }
