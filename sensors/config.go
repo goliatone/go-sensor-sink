@@ -5,6 +5,7 @@ import (
 	"sensors/config"
 )
 
+//Database struct for db settings
 type Database struct {
 	User     string
 	Password string
@@ -24,8 +25,16 @@ func (d Database) String(sslmode string) string {
 		"", d.Host, d.Port, d.User, d.DBName, d.Password, sslmode)
 }
 
+//Server struct for server settings
+type Server struct {
+	Port string
+}
+
+//Config struct with all different configuration entries
 type Config struct {
 	DB Database
+
+	Server Server
 
 	Secret string
 }
@@ -34,13 +43,17 @@ type Config struct {
 func GetConfig(cfg config.YamlConfig) Config {
 	return Config{
 		DB: Database{
-			User: cfg.Database.User, 
-			Password: cfg.Database.Password, 
-			Host: cfg.Database.Host, 
-			Port: cfg.Database.Port, 
-			DBName: cfg.Database.DBName, 
+			User:     cfg.Database.User,
+			Password: cfg.Database.Password,
+			Host:     cfg.Database.Host,
+			Port:     cfg.Database.Port,
+			DBName:   cfg.Database.DBName,
 		},
 
-		Secret: cfg.AppSecret
+		Server: Server{
+			Port: cfg.Server.Port,
+		},
+
+		Secret: cfg.AppSecret,
 	}
 }
