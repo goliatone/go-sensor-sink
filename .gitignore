@@ -83,3 +83,7 @@ bin/darwin/*
 webserver/app
 ops/certs/*
 .envset
+
+
+.vscode/
+main/server
