@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/goliatone/go-sensor-sink/sensors/config"
-	"github.com/goliatone/go-sensor-sink/sensors/rest"
+	"sensors/config"
+	"sensors/rest"
 
 	"github.com/gofiber/fiber"
 )

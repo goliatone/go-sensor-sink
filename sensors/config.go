@@ -2,7 +2,7 @@ package sensors
 
 import (
 	"fmt"
-	"github.com/goliatone/go-sensor-sink/sensors/config"
+	"sensors/config"
 )
 
 type Database struct {

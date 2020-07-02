@@ -1,4 +1,4 @@
-module github.com/goliatone/go-sensor-sink/sensors
+module sensors
 
 go 1.13.3
 
