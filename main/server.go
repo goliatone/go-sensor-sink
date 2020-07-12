@@ -24,11 +24,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// postgres.Migrate(database)
+	postgres.Migrate(database)
 
 	server := fiber.New()
 
-	rest.Router(server)
+	rest.Router(server, database)
 
 	port := fmt.Sprintf(":%s", confg.Server.Port)
 	log.Fatal(server.Listen(port))
