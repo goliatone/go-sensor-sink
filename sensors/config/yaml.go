@@ -23,14 +23,21 @@ type ServerConfig struct {
 	Port string `yaml:"port"`
 }
 
+//MqttConfig has Mqtt configuration options
+type MqttConfig struct {
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+}
+
 //YamlConfig maps the configuration in the yaml file
 //into a struct
 type YamlConfig struct {
-	Database DatabaseConfig `yaml:"database"`
-
-	Server ServerConfig `yaml:"server"`
-
-	AppSecret string `yaml::app_secret_key`
+	Database  DatabaseConfig `yaml:"database"`
+	Server    ServerConfig   `yaml:"server"`
+	Mqtt      MqttConfig     `yaml:"mqtt"`
+	AppSecret string         `yaml::app_secret_key`
 }
 
 //ReadYaml will load a yaml file from the given path and
