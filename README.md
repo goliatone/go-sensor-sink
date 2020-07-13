@@ -57,3 +57,16 @@ GROUP BY bucket, hardware, temperature, humidity;
 NOTE: If you get an error similar to this 
 >pq: relation "dht22_readings" does not exist
 It's because we named our table `dht_readings` and our struct `DHT22Reading` and gorm will automatically generate a table name `dht22_readings` for it.
+
+
+
+## MQTT
+
+Configuration options:
+
+- `SetCleanSession`: SetCleanSession will set the "clean session" flag in the connect message when this client connects to an MQTT broker. By setting this flag, you are indicating that no messages saved by the broker for this client should be delivered. Any messages that were going to be sent by this client before disconnecting previously but didn't will not be sent upon connecting to the broker. 
+
+
+Resources:
+
+- [Paho Go - MQTT Client Library Encyclopedia](https://www.hivemq.com/blog/mqtt-client-library-encyclopedia-golang/)
