@@ -5,9 +5,9 @@ import "time"
 //DHT22Reading is the struct that captures the raw reading of our sensors
 type DHT22Reading struct {
 	Time        time.Time `json:"time,omit_empty" gorm:"time;primary_key"`
-	Hardware    string    `json:"hardware" gorm:"hardware;primary_key"`
-	Humidity    float32   `json:"humidity" gorm:"humidity"`
-	Temperature float32   `json:"temperature" gorm:"temperature"`
+	Hardware    string    `json:"id" gorm:"hardware;primary_key"`
+	Humidity    float32   `json:"h" gorm:"humidity"`
+	Temperature float32   `json:"t" gorm:"temperature"`
 }
 
 //TableName update our table name
