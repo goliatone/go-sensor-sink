@@ -25,10 +25,14 @@ type ServerConfig struct {
 
 //MqttConfig has Mqtt configuration options
 type MqttConfig struct {
-	User     string `yaml:"user"`
-	Password string `yaml:"password"`
-	Host     string `yaml:"host"`
-	Port     string `yaml:"port"`
+	User        string `yaml:"user"`
+	Password    string `yaml:"password"`
+	Host        string `yaml:"host"`
+	Port        string `yaml:"port"`
+	Scheme      string `yaml:"scheme,omitempty"`
+	ClientID    string `yaml:"client_id"`
+	TopicInput  string `yaml:"topic_input"`
+	TopicOutput string `yaml:"topic_output"`
 }
 
 //YamlConfig maps the configuration in the yaml file
