@@ -1,11 +1,9 @@
 package rest
 
 import (
-	"log"
 	"sensors/device"
 	"sensors/sink"
 	"sensors/storage"
-	"time"
 
 	"github.com/gofiber/fiber"
 	fibermiddleware "github.com/gofiber/fiber/middleware"
@@ -116,12 +114,6 @@ func apiRouteGroup(g *fiber.Group, db *storage.Database) {
 			c.Status(503).Send(err)
 			return
 		}
-
-		if reading.Time.IsZero() == true {
-			reading.Time = time.Now()
-		}
-
-		log.Printf("reading time: %v\n", reading.Time)
 
 		reading, err := sinkRepo.Add(reading)
 		if err != nil {
