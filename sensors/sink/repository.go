@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sensors/storage"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 )
@@ -34,6 +35,10 @@ func (r repository) Add(reading DHT22Reading) (DHT22Reading, error) {
 	// 	log.Printf("reading %v", r)
 	// 	return rdr, &ErrReadingExists{inReading: reading, outReading: rdr}
 	// }
+	if reading.Time.IsZero() == true {
+		reading.Time = time.Now()
+	}
+
 	log.Printf("new reading: %+v\n", reading)
 	result := r.database.Create(&reading)
 	if err := result.Error; err != nil {
