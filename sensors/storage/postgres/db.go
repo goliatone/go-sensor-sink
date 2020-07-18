@@ -21,7 +21,7 @@ func NewDatabase(config sensors.Config) (*storage.Database, error) {
 	once.Do(func() {
 		conn, err = gorm.Open("postgres", config.DB.String("disable"))
 		//check config if enabled
-		conn.LogMode(true)
+		// conn.LogMode(true)
 	})
 
 	if err != nil {
