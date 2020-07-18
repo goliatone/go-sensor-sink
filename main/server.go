@@ -44,7 +44,7 @@ func main() {
 
 	server := fiber.New()
 
-	server.Static("/", "../public")
+	server.Static("/", "../frontend/src/build")
 
 	//move to package
 	sinkRepo := sink.NewRepository(database)
