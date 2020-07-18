@@ -15,104 +15,147 @@
         grey: 'rgb(201, 203, 207)'
     };
 
-    const colorNames = Object.keys(chartColors);
-
     let ctx;
-    let myPie;
+    let chart;
+    let unit;
 
-    function randomScalingFactor() {
-        return Math.round(Math.random() * 100);
-    }
-    
-    function newDate(days) {
-        return moment().add(days, 'd').toDate();
-    }
+    function generateData() {
 
-    function newDateString(days) {
-        return moment().add(days, 'd').format();
+        function unitLessThanDay() {
+            return unit === 'second' || unit === 'minute' || unit === 'hour';
+        }
+
+        function beforeNineThirty(date) {
+            return date.hour() < 9 || (date.hour() === 9 && date.minute() < 30);
+        }
+
+        // Returns true if outside 9:30am-4pm on a weekday
+        function outsideMarketHours(date) {
+            if (date.isoWeekday() > 5) return true;
+            
+            if (unitLessThanDay() && (beforeNineThirty(date) || date.hour() > 16)) {
+                return true;
+            }
+            
+            return false;
+        }
+
+        function randomNumber(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function randomBar(date, lastClose) {
+            var open = randomNumber(lastClose * 0.95, lastClose * 1.05).toFixed(2);
+            var close = randomNumber(open * 0.95, open * 1.05).toFixed(2);
+            return {
+                t: date.valueOf(),
+                y: close
+            };
+        }
+
+        var date = moment('Jan 01 1990', 'MMM DD YYYY');
+        var now = moment();
+        var data = [];
+        var lessThanDay = unitLessThanDay();
+        for (; data.length < 600 && date.isBefore(now); date = date.clone().add(1, unit).startOf(unit)) {
+            if (outsideMarketHours(date)) {
+                if (!lessThanDay || !beforeNineThirty(date)) {
+                    date = date.clone().add(date.isoWeekday() >= 5 ? 8 - date.isoWeekday() : 1, 'day');
+                }
+                if (lessThanDay) {
+                    date = date.hour(9).minute(30).second(0);
+                }
+            }
+            data.push(randomBar(date, data.length > 0 ? data[data.length - 1].y : 30));
+        }
+
+        return data;
     }
 
     let config = {
-        type: 'line',
         data: {
             datasets: [{
-                label: 'Dataset with string point data',
+                label: 'CHRT - Chart.js Corporation',
                 borderColor: chartColors.red,
                 backgroundColor: chartColors.orange,
+                data: generateData(),
+                type: 'line',
+                pointRadius: 0,
                 fill: false,
-                data: [{
-                    x: newDateString(0),
-                    y: randomScalingFactor()
-                }, {
-                    x: newDateString(2),
-                    y: randomScalingFactor()
-                }, {
-                    x: newDateString(4),
-                    y: randomScalingFactor()
-                }, {
-                    x: newDateString(5),
-                    y: randomScalingFactor()
-                }],
-            }, {
-                label: 'Dataset with date object point data',
-                borderColor: chartColors.blue,
-                backgroundColor: chartColors.purple,
-                fill: false,
-                data: [{
-                    x: newDate(0),
-                    y: randomScalingFactor()
-                }, {
-                    x: newDate(2),
-                    y: randomScalingFactor()
-                }, {
-                    x: newDate(4),
-                    y: randomScalingFactor()
-                }, {
-                    x: newDate(5),
-                    y: randomScalingFactor()
-                }]
+                lineTension: 0,
+                borderWidth: 2
             }]
         },
         options: {
-            responsive: true,
-            title: {
-                display: true,
-                text: 'Humidity & Temperature'
+            animation: {
+                duration: 0
             },
-            
             scales: {
-                
                 xAxes: [{
                     type: 'time',
-                    display: true,
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Date'
-                    },
+                    distribution: 'series',
+                    offset: true,
                     ticks: {
                         major: {
-                            fontStyle: 'bold',
-                            fontColor: '#FF0000'
+                            enabled: true,
+                            fontStyle: 'bold'
+                        },
+                        source: 'data',
+                        autoSkip: true,
+                        autoSkipPadding: 75,
+                        maxRotation: 0,
+                        sampleSize: 100
+                    },
+                    afterBuildTicks: function(scale, ticks) {
+                        var majorUnit = scale._majorUnit;
+                        var firstTick = ticks[0];
+                        var i, ilen, val, tick, currMajor, lastMajor;
+
+                        val = moment(ticks[0].value);
+                        if ((majorUnit === 'minute' && val.second() === 0)
+                                || (majorUnit === 'hour' && val.minute() === 0)
+                                || (majorUnit === 'day' && val.hour() === 9)
+                                || (majorUnit === 'month' && val.date() <= 3 && val.isoWeekday() === 1)
+                                || (majorUnit === 'year' && val.month() === 0)) {
+                            firstTick.major = true;
+                        } else {
+                            firstTick.major = false;
                         }
-                    },
-                    gridLines: {
-                        display: true,
-                        color: 'rgba(224,224,224,0.1)',
-                        z: -1
-                    },
+                        lastMajor = val.get(majorUnit);
+
+                        for (i = 1, ilen = ticks.length; i < ilen; i++) {
+                            tick = ticks[i];
+                            val = moment(tick.value);
+                            currMajor = val.get(majorUnit);
+                            tick.major = currMajor !== lastMajor;
+                            lastMajor = currMajor;
+                        }
+                        return ticks;
+                    }
                 }],
                 yAxes: [{
-                    display: true,
+                    gridLines: {
+                        drawBorder: false
+                    },
                     scaleLabel: {
                         display: true,
-                        labelString: 'value'
-                    },
-                    gridLines: {
-                        display: true,
-                        color: 'rgba(224,224,224,0.1)',
-                        z: -1
-                    },
+                        labelString: 'Closing price ($)'
+                    }
                 }]
+            },
+            tooltips: {
+                intersect: false,
+                mode: 'index',
+                callbacks: {
+                    label: function(tooltipItem, myData) {
+                        var label = myData.datasets[tooltipItem.datasetIndex].label || '';
+                        if (label) {
+                            label += ': ';
+                        }
+                        label += parseFloat(tooltipItem.value).toFixed(2);
+                        return label;
+                    }
+                }
             }
         }
     };
@@ -120,68 +163,52 @@
     window.config = config;
 
     onMount(_=>{
-        ctx = document.getElementById('chart-area').getContext('2d');
+        unit = document.getElementById('unit').value;
+        ctx = document.getElementById('chart1').getContext('2d');
+        ctx.canvas.width = 1000;
+        ctx.canvas.height = 300;
     });
 
     function initializeChart() {
-        console.log('after update?')
     
         /**
          * Attach the graph to the DOM
          */ 
         
         
-        myPie = new Chart(ctx, config);
+        chart = new Chart(ctx, config);
     }
 
     /**
      * Handle button click for randomized dataset
      */ 
-    function randomizeData() {
-        config.data.datasets.forEach(dataset => {
-            dataset.data.forEach(dataObj => {
-                dataObj.y = randomScalingFactor();
-            });
-        });
-
-        myPie.update();
+    function update() {
+        var type = document.getElementById('type').value;
+        var dataset = chart.config.data.datasets[0];
+        dataset.type = type;
+        dataset.data = generateData();
+        chart.update();
     }
-    /**
-     * Handle adding a new dataset
-     */ 
-    function addDataset() {
-        if (config.data.datasets.length > 0) {
-            config.data.datasets[0].data.push({
-                x: newDateString(config.data.datasets[0].data.length + 2),
-                y: randomScalingFactor()
-            });
-            config.data.datasets[1].data.push({
-                x: newDate(config.data.datasets[1].data.length + 2),
-                y: randomScalingFactor()
-            });
-
-            myPie.update();
-        }
-    }
-
-    /**
-     * Handle removing dataset
-     */ 
-    function removeDataset(){
-        // config.data.datasets.splice(0, 1);
-        config.data.datasets.forEach(function(dataset) {
-            dataset.data.pop();
-        });
-        myPie.update();
-    }
+    
 
     afterUpdate(initializeChart);
 </script>
 
 <div id="canvas-holder" style="width:3;height=1;" >
-    <canvas id="chart-area"></canvas>
+    <canvas id="chart1"></canvas>
 </div>
 
-<button id="randomizeData" on:click={_=> randomizeData()}>Randomize Data</button>
-<button id="addDataset" on:click={_=> addDataset()}>Add Dataset</button>
-<button id="removeDataset" on:click={_=> removeDataset()}>Remove Dataset</button>
+Chart Type:
+<select id="type">
+    <option value="line">Line</option>
+    <option value="bar">Bar</option>
+</select>
+<select id="unit">
+    <option value="second">Second</option>
+    <option value="minute">Minute</option>
+    <option value="hour">Hour</option>
+    <option value="day" selected>Day</option>
+    <option value="month">Month</option>
+    <option value="year">Year</option>
+</select>
+<button id="update" on:click={_=>update()} >update</button>

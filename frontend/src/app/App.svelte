@@ -30,7 +30,7 @@
 </script>
 
 <main>
-	<h3>Humidity And Temperature Dashboard</h3>
+	<h3>Humidity & Temperature Dashboard</h3>
 	<p>Simple dashboard showing data collected using ESP8266 and DHT22 sensors.</p>
 	<Chart {data}/>
 	<button on:click={_=>updateSourceData()}>Update Source Data</button>
