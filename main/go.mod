@@ -6,4 +6,7 @@ require sensors v1.0.0
 
 replace sensors => ../sensors
 
-require github.com/gofiber/fiber v1.12.2
+require (
+	github.com/eclipse/paho.mqtt.golang v1.2.0
+	github.com/gofiber/fiber v1.12.2
+)

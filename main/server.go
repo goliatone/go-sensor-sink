@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"sensors"
 	"sensors/config"
@@ -43,11 +44,20 @@ func main() {
 
 	server := fiber.New()
 
+	server.Static("/", "../public")
+
 	//move to package
 	sinkRepo := sink.NewRepository(database)
 	pubsub.SetConfig(&cnf.Mqtt)
+
 	mqttClient := pubsub.AddCommandHandler(0, func(mc mqtt.Client, msg mqtt.Message) {
+		//TODO: We get all messages, we should actually prefix it with server id so
+		//that we don't get our own messages...
 		log.Printf("Reading message: %s %s", msg.Topic(), msg.Payload())
+		if strings.Contains(msg.Topic(), "/readings") == false {
+			return
+		}
+
 		reading, err := newReading(msg.Payload())
 		if err != nil {
 			log.Println("error handling reading:" + err.Error())
