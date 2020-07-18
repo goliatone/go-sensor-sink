@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"sensors/storage"
+	"strconv"
 	"time"
 
+	"github.com/gofiber/fiber"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -13,6 +15,7 @@ import (
 type Repository interface {
 	Add(DHT22Reading) (DHT22Reading, error)
 	Delete(DHT22Reading) error
+	Get(SearchParameters) ([]DHT22Reading, error)
 	GetByID(uuid.UUID) (DHT22Reading, error)
 }
 
@@ -54,6 +57,69 @@ func (r repository) Delete(reading DHT22Reading) error {
 		return NewErrUnexpected(result.Error)
 	}
 	return nil
+}
+
+//SearchParameters query builder for search
+type SearchParameters struct {
+	Page  int
+	Limit int
+	Order string
+}
+
+//NewSearchParameters build new SearchParameters from context
+func NewSearchParameters(c *fiber.Ctx) SearchParameters {
+	sp := SearchParameters{
+		Page:  1,
+		Limit: 10,
+		Order: "time desc",
+	}
+
+	if c.Query("order") != "" {
+		sp.Order = c.Query("order")
+	}
+
+	if c.Query("page") != "" {
+		p, err := strconv.Atoi(c.Query("page"))
+		if err != nil {
+			log.Println("error converting page")
+		} else {
+			sp.Page = p
+		}
+	}
+
+	if c.Query("limit") != "" {
+		l, err := strconv.Atoi(c.Query("limit"))
+		if err != nil {
+			log.Println("error converting limit")
+		} else {
+			sp.Limit = l
+		}
+	}
+
+	log.Printf("order: %v\n", c.Query("order"))
+
+	return sp
+}
+
+//Offset returns page * limit
+func (s SearchParameters) Offset() int {
+	return s.Page * s.Limit
+}
+
+func (r repository) Get(qs SearchParameters) ([]DHT22Reading, error) {
+	var readings []DHT22Reading
+	// r.database.LogMode(true)
+	// r.database.Offset(40).Limit(10).Find(&readings)
+
+	offset := qs.Offset()
+	tx := r.database.Offset(offset)
+	tx = tx.Limit(qs.Limit)
+	tx = tx.Order(qs.Order)
+
+	tx.LogMode(true)
+	tx.Find(&readings)
+
+	return readings, nil
 }
 
 func (r repository) GetByID(id uuid.UUID) (DHT22Reading, error) {
