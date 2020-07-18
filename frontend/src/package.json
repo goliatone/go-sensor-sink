@@ -1,0 +1,49 @@
+{
+  "name": "sensor-sink-dashboard",
+  "version": "0.0.0",
+  "description": "Senor sink dashboard",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/goliatone/sensor-sink-dashboard.git"
+  },
+  "author": "goliatone <hello@goliatone.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/goliatone/sensor-sink-dashboard/issues"
+  },
+  "homepage": "https://github.com/goliatone/sensor-sink-dashboard#readme",
+  "keywords": [
+    "svelte",
+    "simple-project-generator"
+  ],
+  "scripts": {
+    "build": "rimraf build && rollup -c",
+    "dev": "rollup -c -w",
+    "test": "./node_modules/.bin/bogota",
+    "start": "sirv build",
+    "postbuild": "node postbuild.js"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^14.0.0",
+    "@rollup/plugin-node-resolve": "^8.4.0",
+    "@rollup/plugin-replace": "^2.3.3",
+    "chart.js": "^2.9.3",
+    "htmlnano": "^0.2.6",
+    "in-view": "^0.6.1",
+    "moment": "^2.27.0",
+    "posthtml": "^0.13.1",
+    "posthtml-content": "0.0.3",
+    "posthtml-hash": "^1.1.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.21.0",
+    "rollup-plugin-browsersync": "^1.1.0",
+    "rollup-plugin-copy": "^3.3.0",
+    "rollup-plugin-svelte": "^5.2.3",
+    "rollup-plugin-terser": "^6.1.0",
+    "sirv-cli": "^0.4.6",
+    "svelte": "^3.24.0"
+  },
+  "dependencies": {
+    "sirv-cli": "^0.4.4"
+  }
+}
