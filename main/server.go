@@ -11,6 +11,7 @@ import (
 
 	"sensors"
 	"sensors/config"
+	"sensors/event"
 	"sensors/pubsub"
 	"sensors/rest"
 	"sensors/sink"
@@ -19,6 +20,17 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gofiber/fiber"
 )
+
+type WsManager struct {
+	clients map[string]string
+	sockets map[string]ikisocket.Websocket
+}
+
+func (ws *WsManager) Broadcast(message []byte) {
+	for _, socket := range ws.sockets {
+		socket.EmitTo(socket.UUID, message)
+	}
+}
 
 type MessageObject struct {
 	Data string `json:"data"`
@@ -35,6 +47,10 @@ func newReading(msg []byte) (sink.DHT22Reading, error) {
 	return reading, nil
 }
 
+const (
+	publicPath = "../frontend/src/build"
+)
+
 func main() {
 
 	yaml := config.ReadYaml("")
@@ -48,13 +64,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	emitter := event.NewEmitter()
+
 	postgres.Migrate(database)
 
 	server := fiber.New()
 
-	server.Static("/", "../frontend/src/build")
+	server.Static("/", publicPath)
+
+	wsm := WsManager{}
+	wsm.clients = make(map[string]string)
+	wsm.sockets = make(map[string]ikisocket.Websocket)
 
 	clients := make(map[string]string)
+	// sockets := make(map[string]ikisocket.Websocket)
 
 	server.Use(func(c *fiber.Ctx) {
 		c.Locals("user_id", c.Query("user_id"))
@@ -63,6 +86,8 @@ func main() {
 
 	ikisocket.On(ikisocket.EventConnect, func(ep *ikisocket.EventPayload) {
 		fmt.Println("ws connect")
+		userID := fmt.Sprintf("%v", ep.Kws.Locals("user_id"))
+		wsm.sockets[userID] = ep.Kws
 	})
 
 	ikisocket.On(ikisocket.EventMessage, func(ep *ikisocket.EventPayload) {
@@ -71,6 +96,8 @@ func main() {
 
 	ikisocket.On(ikisocket.EventDisconnect, func(ep *ikisocket.EventPayload) {
 		fmt.Println("fired disconnect" + ep.Error.Error())
+		userID := fmt.Sprintf("%v", ep.Kws.Locals("user_id"))
+		delete(wsm.sockets, userID)
 	})
 
 	server.Get("/ws", ikisocket.New(func(kws *ikisocket.Websocket) {
@@ -81,6 +108,7 @@ func main() {
 
 		kws.OnConnect = func() {
 			clients[userID] = kws.UUID
+
 			kws.Emit([]byte("Hello user " + userID))
 			kws.Broadcast([]byte("User connected "+userID+" UUID: "+kws.UUID), true)
 		}
@@ -110,7 +138,7 @@ func main() {
 		//TODO: We get all messages, we should actually prefix it with server id so
 		//that we don't get our own messages...
 		// log.Printf("Reading message: %s %s", msg.Topic(), msg.Payload())
-		if strings.Contains(msg.Topic(), "/readings") == false {
+		if strings.Contains(msg.Topic(), "/reading") == false {
 			return
 		}
 
@@ -119,14 +147,30 @@ func main() {
 			log.Println("error handling reading:" + err.Error())
 			return
 		}
+
+		emitter.EmitSync("mqtt.event", reading)
+	})
+
+	if mqttClient != nil {
+		log.Println("started mqtt")
+	}
+
+	emitter.On("mqtt.event", func(args ...interface{}) {
+		// fmt.Printf("mqtt event: %v", args[0])
+		reading := args[0].(sink.DHT22Reading)
 		_, err = sinkRepo.Add(reading)
 		if err != nil {
 			log.Println("error adding reading:" + err.Error())
 		}
+		if message, err := reading.Deserialize(); err == nil {
+			log.Println("message: %s", string(message))
+			wsm.Broadcast(message)
+			// for _, socket := range sockets {
+			// 	log.Printf("socket %s emit to %s", socket.UUID, socket.Locals("user_id"))
+			// 	socket.EmitTo(socket.UUID, message)
+			// }
+		}
 	})
-	if mqttClient != nil {
-		log.Println("started mqtt")
-	}
 
 	rest.Router(server, database)
 
