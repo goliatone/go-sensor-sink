@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 
+	ikisocket "github.com/antoniodipinto/ikisocket"
+
 	"sensors"
 	"sensors/config"
 	"sensors/pubsub"
@@ -17,6 +19,12 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gofiber/fiber"
 )
+
+type MessageObject struct {
+	Data string `json:"data"`
+	From string `json:"from"`
+	To   string `json:"to"`
+}
 
 func newReading(msg []byte) (sink.DHT22Reading, error) {
 	reading := sink.DHT22Reading{}
@@ -46,6 +54,54 @@ func main() {
 
 	server.Static("/", "../frontend/src/build")
 
+	clients := make(map[string]string)
+
+	server.Use(func(c *fiber.Ctx) {
+		c.Locals("user_id", c.Query("user_id"))
+		c.Next()
+	})
+
+	ikisocket.On(ikisocket.EventConnect, func(ep *ikisocket.EventPayload) {
+		fmt.Println("ws connect")
+	})
+
+	ikisocket.On(ikisocket.EventMessage, func(ep *ikisocket.EventPayload) {
+		fmt.Printf("ws message-> name %s data %s uuid %s \n", ep.Name, string(ep.Data), ep.SocketUUID)
+	})
+
+	ikisocket.On(ikisocket.EventDisconnect, func(ep *ikisocket.EventPayload) {
+		fmt.Println("fired disconnect" + ep.Error.Error())
+	})
+
+	server.Get("/ws", ikisocket.New(func(kws *ikisocket.Websocket) {
+		userID := fmt.Sprintf("%v", kws.Locals("user_id"))
+		fmt.Printf("ws user id: %s uuid: %s", userID, kws.UUID)
+
+		kws.SetAttribute("user_id", userID)
+
+		kws.OnConnect = func() {
+			clients[userID] = kws.UUID
+			kws.Emit([]byte("Hello user " + userID))
+			kws.Broadcast([]byte("User connected "+userID+" UUID: "+kws.UUID), true)
+		}
+
+		kws.OnMessage = func(data []byte) {
+			message := MessageObject{}
+			json.Unmarshal(data, &message)
+
+			fmt.Printf("message to %s: %s\n", message.To, message.Data)
+
+			err := kws.EmitTo(clients[message.To], data)
+			if err != nil {
+				fmt.Printf("message %s error: %v\n", message.From, err)
+			}
+		}
+	}))
+
+	ikisocket.On("close", func(payload *ikisocket.EventPayload) {
+		fmt.Println("ws closed " + payload.SocketAttributes["user_id"])
+	})
+
 	//move to package
 	sinkRepo := sink.NewRepository(database)
 	pubsub.SetConfig(&cnf.Mqtt)
@@ -53,7 +109,7 @@ func main() {
 	mqttClient := pubsub.AddCommandHandler(0, func(mc mqtt.Client, msg mqtt.Message) {
 		//TODO: We get all messages, we should actually prefix it with server id so
 		//that we don't get our own messages...
-		log.Printf("Reading message: %s %s", msg.Topic(), msg.Payload())
+		// log.Printf("Reading message: %s %s", msg.Topic(), msg.Payload())
 		if strings.Contains(msg.Topic(), "/readings") == false {
 			return
 		}
