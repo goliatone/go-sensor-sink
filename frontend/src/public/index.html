@@ -17,6 +17,104 @@
 </head>
 
 <body>
+    <div id="app"></div>
+
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-body">
+                <strong>Websocket PubSub Message App</strong>
+                <ol class="ordered-list">
+                    <li>To start click on open.</li>
+                    <li>Type and click to send button.</li>
+                    <li>To close socket connection.</li>
+                </ol>
+                <form>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-primary" id="open">Open</button>
+                        <button type="button" class="btn btn-danger" id="close">Close</button>
+    
+                    </div>
+                    <div class="form-group">
+                        <input id="input" type="text" class="form-control" value="Hi">
+                        <button id="send" class="btn btn-success">Send</button>
+                    </div>
+    
+                </form>
+    
+                <div id="output"></div>
+    
+            </div>
+        </div>
+    </div>
 </body>
 
+<script>
+    window.addEventListener("load", function (evt) {
+        const output = document.getElementById("output");
+        const input = document.getElementById("input");
+        let socket;
+        
+        const debug = function (message) {
+            const d = document.createElement("div");
+            d.textContent = message;
+            output.appendChild(d);
+        };
+
+        document.getElementById("open").onclick = function (evt) {
+            if (socket) return false;
+
+            const qs = new URLSearchParams(location.search);
+            const userId = qs.get('user_id');
+            const wsUrl = `ws://localhost:3131/ws?user_id=${userId}`;
+
+            console.log(wsUrl);
+
+            socket = new WebSocket(wsUrl);
+
+            window.sendMessage = function(data) {
+                socket.send({data, to, from: userId});
+            };
+
+            socket.onopen = function (evt) {
+                debug("OPEN");
+            };
+
+            socket.onclose = function (evt) {
+                debug("CLOSE");
+                socket = null;
+            };
+
+            socket.onmessage = function (evt) {
+                if(evt.data.indexOf('{') === 0) {
+                    console.log('isJSON', evt.data.indexOf('{')===0);
+                    evt.data = JSON.parse(evt.data);
+                    let message = JSON.parse(evt.data);
+                    console.log(typeof message, message.h);
+                    evt.data = message;
+                }
+                // console.log(evt);
+                debug("RESPONSE: " + evt.data);
+            };
+
+            socket.onerror = function (evt) {
+                debug("ERROR: " + evt.data);
+            };
+
+            return false;
+        };
+
+        document.getElementById("send").onclick = function (evt) {
+            if (!socket) return false;
+            debug("SEND: " + input.value);
+            socket.send(input.value);
+            return false;
+        };
+
+        document.getElementById("close").onclick = function (evt) {
+            if (!socket) return false;
+            socket.close();
+            return false;
+        };
+   });
+</script>
 </html>
