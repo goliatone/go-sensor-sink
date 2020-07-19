@@ -42,7 +42,7 @@ func (r repository) Add(reading DHT22Reading) (DHT22Reading, error) {
 		reading.Time = time.Now()
 	}
 
-	log.Printf("new reading: %+v\n", reading)
+	// log.Printf("new reading: %+v\n", reading)
 	result := r.database.Create(&reading)
 	if err := result.Error; err != nil {
 		return DHT22Reading{}, NewErrUnexpected(err)
