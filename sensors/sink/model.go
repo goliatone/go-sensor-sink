@@ -1,6 +1,9 @@
 package sink
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 //DHT22Reading is the struct that captures the raw reading of our sensors
 type DHT22Reading struct {
@@ -13,6 +16,11 @@ type DHT22Reading struct {
 //TableName update our table name
 func (DHT22Reading) TableName() string {
 	return "dht_readings"
+}
+
+//Deserialize returns a json string representation of the reading
+func (d DHT22Reading) Deserialize() ([]byte, error) {
+	return json.Marshal(d)
 }
 
 //SensorReadingAggregate represents aggregated sensor readings of different time buckets
