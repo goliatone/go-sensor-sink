@@ -1,39 +1,49 @@
 <script>
-	import Chart from "./Chart.svelte";
+	import Chart from './Chart.svelte';
+	import moment from 'moment';
+	import makeWebsocketStore from './stores/ws';
 
-	var randomScalingFactor = function() {
-        return Math.round(Math.random() * 100);
-	};
-	
-	let data = [
-		randomScalingFactor(),
-		randomScalingFactor(),
-		randomScalingFactor(),
-		randomScalingFactor(),
-		randomScalingFactor(),
-	];
+	let chart;
+	let initialValue = {};
 
-	function updateSourceData() {
-		console.log('update data source');
-		data = [
-			randomScalingFactor(),
-			randomScalingFactor(),
-			randomScalingFactor(),
-			randomScalingFactor(),
-			randomScalingFactor(),
-		]	
-	}
-
-	export let name;
 	export let version;
 	export let environment;
+	
+	function makeWsUrl() {
+		const qs = new URLSearchParams(location.search);
+        const userId = qs.get('user_id');
+		let url = `ws://localhost:3131/ws?user_id=${userId}`;
+		console.log('url', url);
+		return url;
+	}
+
+	const wsStore = makeWebsocketStore(makeWsUrl(),[],  initialValue);
+	
+
+	let data = [{t: 1595219532618, y: 27 }];
+
+	wsStore.subscribe(value => {
+		if(!value || !value.time || !chart) return;
+		
+		let reading = {
+			t: parseInt(Math.abs(moment(value.time).format('x'))),
+            y: value.t
+		};
+		
+		data.push(reading);
+
+		chart.updateData(data);	
+	});
+
+	
 </script>
 
 <main>
 	<h3>Humidity & Temperature Dashboard</h3>
 	<p>Simple dashboard showing data collected using ESP8266 and DHT22 sensors.</p>
-	<Chart {data}/>
-	<button on:click={_=>updateSourceData()}>Update Source Data</button>
+	
+	<Chart bind:this={chart}/>
+
 	<footer>
 		<strong>{environment}-{version}</strong>
 	</footer>
