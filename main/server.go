@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	ikisocket "github.com/antoniodipinto/ikisocket"
 
@@ -26,6 +27,15 @@ type WsManager struct {
 	sockets map[string]ikisocket.Websocket
 }
 
+func (ws *WsManager) AddSocket(socket ikisocket.Websocket) {
+	ws.sockets[socket.UUID] = socket
+}
+
+func (ws *WsManager) RemoveSocket(uuid string) {
+	delete(ws.sockets, uuid)
+}
+
+//Broadcast
 func (ws *WsManager) Broadcast(message []byte) {
 	for _, socket := range ws.sockets {
 		socket.EmitTo(socket.UUID, message)
@@ -44,6 +54,11 @@ func newReading(msg []byte) (sink.DHT22Reading, error) {
 	if err != nil {
 		return sink.DHT22Reading{}, err
 	}
+
+	if reading.Time.IsZero() == true {
+		reading.Time = time.Now()
+	}
+
 	return reading, nil
 }
 
@@ -108,9 +123,8 @@ func main() {
 
 		kws.OnConnect = func() {
 			clients[userID] = kws.UUID
-
-			kws.Emit([]byte("Hello user " + userID))
-			kws.Broadcast([]byte("User connected "+userID+" UUID: "+kws.UUID), true)
+			// kws.Emit([]byte("Hello user " + userID))
+			// kws.Broadcast([]byte("User connected "+userID+" UUID: "+kws.UUID), true)
 		}
 
 		kws.OnMessage = func(data []byte) {
@@ -156,19 +170,15 @@ func main() {
 	}
 
 	emitter.On("mqtt.event", func(args ...interface{}) {
-		// fmt.Printf("mqtt event: %v", args[0])
 		reading := args[0].(sink.DHT22Reading)
 		_, err = sinkRepo.Add(reading)
+
 		if err != nil {
 			log.Println("error adding reading:" + err.Error())
 		}
+
 		if message, err := reading.Deserialize(); err == nil {
-			log.Println("message: %s", string(message))
 			wsm.Broadcast(message)
-			// for _, socket := range sockets {
-			// 	log.Printf("socket %s emit to %s", socket.UUID, socket.Locals("user_id"))
-			// 	socket.EmitTo(socket.UUID, message)
-			// }
 		}
 	})
 
