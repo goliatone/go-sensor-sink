@@ -3,38 +3,23 @@
     import moment from 'moment';
     import Chart from 'chart.js';
 
-    const chartColors = {
-        red: 'rgb(255, 99, 132)',
-        orange: 'rgb(255, 159, 64)',
-        yellow: 'rgb(255, 205, 86)',
-        green: 'rgb(75, 192, 192)',
-        blue: 'rgb(54, 162, 235)',
-        purple: 'rgb(153, 102, 255)',
-        grey: 'rgb(201, 203, 207)'
-    };
-
+    export let chartId;
+    export let label;
+    export let borderColor; 
+    export let backgroundColor;
+    
     let ctx;
     let chart;
+    let type;
     let unit;
 
     let config = {
         data: {
             datasets: [
-            // {
-            //     label: 'Humidity',
-            //     borderColor: chartColors.red,
-            //     backgroundColor: chartColors.orange,
-            //     data: getReadingsData(readings, 'humidity'),
-            //     type: 'line',
-            //     pointRadius: 0,
-            //     fill: false,
-            //     lineTension: 0,
-            //     borderWidth: 2
-            // },
             {
-                label: 'Temperature',
-                borderColor: chartColors.blue,
-                backgroundColor: chartColors.purple,
+                label,
+                borderColor,
+                backgroundColor,
                 data:[{
                     t:0,
                     y:70
@@ -108,10 +93,10 @@
                     gridLines: {
                         drawBorder: false
                     },
-                    scaleLabel: {
-                        display: true,
-                        labelString: 'Temperature'
-                    }
+                    // scaleLabel: {
+                    //     display: true,
+                    //     labelString: scaleLabel
+                    // }
                 }]
             },
             tooltips: {
@@ -136,18 +121,12 @@
 
     onMount(_=>{
         unit = document.getElementById('unit').value;
-        ctx = document.getElementById('chart1').getContext('2d');
+        ctx = document.getElementsByClassName(chartId)[0].getContext('2d');
         ctx.canvas.width = 1000;
         ctx.canvas.height = 300;
     });
 
     function initializeChart() {
-    
-        /**
-         * Attach the graph to the DOM
-         */ 
-        
-        
         chart = new Chart(ctx, config);
     }
 
@@ -155,14 +134,9 @@
      * Handle button click for randomized dataset
      */ 
     function update() {
-        function updateDateset(index, type) {
-            var type = document.getElementById('type').value;
-            var dataset = chart.config.data.datasets[index];
-            dataset.type = type;
-            // dataset.data = getReadingsData(readings, type);
-        }
-        // updateDateset(0, 'humitidy');
-        // updateDateset(1, 'temperature');
+        var type = document.getElementById('type').value;
+        var dataset = chart.config.data.datasets[0];
+        dataset.type = type;
 
         chart.update();
     }
@@ -178,18 +152,23 @@
     
 
     afterUpdate(initializeChart);
+
+    $: if(chart && type) {
+        var dataset = chart.config.data.datasets[0];
+        dataset.type = type;
+    }
 </script>
 
 <div id="canvas-holder" style="width:3;height=1;" >
-    <canvas id="chart1"></canvas>
+    <canvas class="{chartId}"></canvas>
 </div>
 
 Chart Type:
-<select id="type">
+<select id="type" bind:value={type}>
     <option value="line">Line</option>
     <option value="bar">Bar</option>
 </select>
-<select id="unit">
+<select id="unit" bind:value={unit}>
     <option value="second">Second</option>
     <option value="minute">Minute</option>
     <option value="hour">Hour</option>
@@ -197,4 +176,4 @@ Chart Type:
     <option value="month">Month</option>
     <option value="year">Year</option>
 </select>
-<button id="update" on:click={_=>update()} >update</button>
+<button id="update" on:click={_=>update()} >Update</button>
