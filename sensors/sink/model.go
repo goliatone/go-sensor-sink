@@ -23,6 +23,21 @@ func (d DHT22Reading) Deserialize() ([]byte, error) {
 	return json.Marshal(d)
 }
 
+//NewDHT22Reading creates a new DHT22Reading instance
+func NewDHT22Reading(msg []byte) (DHT22Reading, error) {
+	reading := DHT22Reading{}
+	err := json.Unmarshal(msg, &reading)
+	if err != nil {
+		return DHT22Reading{}, err
+	}
+
+	if reading.Time.IsZero() == true {
+		reading.Time = time.Now()
+	}
+
+	return reading, nil
+}
+
 //SensorReadingAggregate represents aggregated sensor readings of different time buckets
 type SensorReadingAggregate struct {
 	Hardware    string  `json:"hardware" gorm:"device;index:hardware"`
