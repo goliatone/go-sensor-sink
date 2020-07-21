@@ -3,7 +3,8 @@
 	import moment from 'moment';
 	import makeWebsocketStore from './stores/ws';
 
-	let chart;
+	let tChart;
+	let hChart;
 	let initialValue = {};
 
 	export let version;
@@ -20,29 +21,47 @@
 	const wsStore = makeWebsocketStore(makeWsUrl(),[],  initialValue);
 	
 
-	let data = [{t: 1595219532618, y: 27 }];
+	let tData = [{t: 1595219532618, y: 27 }];
+	let hData = [{t: 1595219532618, y: 27 }];
 
 	wsStore.subscribe(value => {
-		if(!value || !value.time || !chart) return;
-		
-		let reading = {
+		if(!value || !value.time || !tChart) return;
+
+		tData.push({
 			t: parseInt(Math.abs(moment(value.time).format('x'))),
             y: value.t
-		};
-		
-		data.push(reading);
+		});
 
-		chart.updateData(data);	
+		tChart.updateData(tData);
+
+		hData.push({
+			t: parseInt(Math.abs(moment(value.time).format('x'))),
+            y: value.h
+		});
+
+		hChart.updateData(hData);
 	});
-
-	
 </script>
 
 <main>
 	<h3>Humidity & Temperature Dashboard</h3>
 	<p>Simple dashboard showing data collected using ESP8266 and DHT22 sensors.</p>
 	
-	<Chart bind:this={chart}/>
+	<Chart 
+		chartId={"tChart"} 
+		label="Temperature °C"
+		borderColor="rgb(255, 99, 132)" 
+		backgroundColor="rgb(255, 159, 64)" 
+		bind:this={tChart}
+	/>
+
+	<Chart 
+		chartId={"hChart"} 
+		label="Humidity %"
+		borderColor="rgb(54, 162, 235)" 
+		backgroundColor="rgb(153, 102, 255)" 
+		bind:this={hChart}
+	/>
 
 	<footer>
 		<strong>{environment}-{version}</strong>
