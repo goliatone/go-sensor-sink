@@ -3,6 +3,7 @@ module sensors
 go 1.13.3
 
 require (
+	github.com/antoniodipinto/ikisocket v0.0.0-20200526172531-f031f26ec81d
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/eclipse/paho.mqtt.golang v1.2.0
 	github.com/gofiber/fiber v1.12.2
