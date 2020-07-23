@@ -32,8 +32,8 @@ CREATE TABLE IF NOT EXISTS dht_readings (
 SELECT create_hypertable('dht_readings', 'time', if_not_exists => TRUE);
 ```
 
-
 ```sql
+DROP VIEW IF EXISTS dht_readings_5m CASCADE;
 CREATE VIEW dht_readings_5m 
 WITH (
     timescaledb.continuous,
@@ -51,7 +51,75 @@ AS SELECT
   MAX(temperature) as temperature_max,
   MIN(temperature) as temperature_min
 FROM dht_readings
-GROUP BY bucket, hardware, temperature, humidity;
+GROUP BY bucket, hardware;
+```
+
+```sql
+DROP VIEW IF EXISTS dht_readings_1h CASCADE;
+CREATE VIEW dht_readings_1h
+WITH (
+    timescaledb.continuous,
+    timescaledb.ignore_invalidation_older_than = '5d',
+    timescaledb.refresh_lag = '-30m',
+    timescaledb.refresh_interval = '1h'
+)
+AS 
+    SELECT
+        time_bucket('1h', time) as bucket, 
+        hardware,
+        AVG(humidity) as humidity_avg,
+        MAX(humidity) as humidity_max,
+        MIN(humidity) as humidity_min,
+        AVG(temperature) as temperature_avg,
+        MAX(temperature) as temperature_max,
+        MIN(temperature) as temperature_min
+    FROM dht_readings
+    GROUP BY bucket, hardware;
+```
+
+```sql
+DROP VIEW IF EXISTS dht_readings_1d CASCADE;
+CREATE VIEW dht_readings_1d
+WITH (
+    timescaledb.continuous,
+    timescaledb.ignore_invalidation_older_than = '31d',
+    timescaledb.refresh_lag = '-30m',
+    timescaledb.refresh_interval = '1d'
+)
+AS SELECT
+  time_bucket('1d', time) as bucket, 
+  hardware,
+  AVG(humidity) as humidity_avg,
+  MAX(humidity) as humidity_max,
+  MIN(humidity) as humidity_min,
+  AVG(temperature) as temperature_avg,
+  MAX(temperature) as temperature_max,
+  MIN(temperature) as temperature_min
+FROM dht_readings
+GROUP BY bucket, hardware;
+```
+
+```sql
+DROP VIEW IF EXISTS dht_readings_30d CASCADE;
+CREATE VIEW dht_readings_30d
+WITH (
+    timescaledb.continuous,
+    timescaledb.ignore_invalidation_older_than = '31d',
+    timescaledb.refresh_lag = '-30m',
+    timescaledb.refresh_interval = '1d'
+)
+AS 
+    SELECT
+        time_bucket('30 days', time) as bucket, 
+        hardware,
+        AVG(humidity) as humidity_avg,
+        MAX(humidity) as humidity_max,
+        MIN(humidity) as humidity_min,
+        AVG(temperature) as temperature_avg,
+        MAX(temperature) as temperature_max,
+        MIN(temperature) as temperature_min
+    FROM dht_readings
+    GROUP BY bucket, hardware;
 ```
 
 NOTE: If you get an error similar to this 
