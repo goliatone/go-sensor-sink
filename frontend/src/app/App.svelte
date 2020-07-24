@@ -24,21 +24,25 @@
 	let tData = [{t: 1595219532618, y: 27 }];
 	let hData = [{t: 1595219532618, y: 27 }];
 
+	function maxPush(a, v, max=6) {
+  		a.push(v);
+  		if(a.length >= max) a.shift();
+  		return a
+	}
 	wsStore.subscribe(value => {
 		if(!value || !value.time || !tChart) return;
 
-		tData.push({
+		maxPush(tData, {
 			t: parseInt(Math.abs(moment(value.time).format('x'))),
             y: value.t
-		});
+		}, 100);
 
-		tChart.updateData(tData);
-
-		hData.push({
+		maxPush(hData, {
 			t: parseInt(Math.abs(moment(value.time).format('x'))),
             y: value.h
-		});
+		}, 100);
 
+		tChart.updateData(tData);
 		hChart.updateData(hData);
 	});
 </script>
