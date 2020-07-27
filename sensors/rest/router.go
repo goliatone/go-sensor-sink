@@ -123,7 +123,7 @@ func apiRouteGroup(g *fiber.Group, db *storage.Database) {
 		c.JSON(reading)
 	})
 
-	g.Get("/sensors/reading", func(c *fiber.Ctx) {
+	g.Get("/sensors/readings", func(c *fiber.Ctx) {
 		qs := sink.NewSearchParameters(c)
 
 		readings, err := sinkRepo.Get(qs)
@@ -132,5 +132,16 @@ func apiRouteGroup(g *fiber.Group, db *storage.Database) {
 			return
 		}
 		c.JSON(readings)
+	})
+
+	g.Get("/sensors/readings/:bucket", func(c *fiber.Ctx) {
+		bucket := c.Params("bucket")
+
+		items, err := sinkRepo.GetAggregateByBucket(bucket)
+		if err != nil {
+			c.Status(503).Send(err)
+			return
+		}
+		c.JSON(items)
 	})
 }
