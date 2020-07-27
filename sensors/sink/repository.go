@@ -17,6 +17,7 @@ type Repository interface {
 	Delete(DHT22Reading) error
 	Get(SearchParameters) ([]DHT22Reading, error)
 	GetByID(uuid.UUID) (DHT22Reading, error)
+	GetAggregateByBucket(string) ([]SensorReadingAggregate, error)
 }
 
 type repository struct {
@@ -135,4 +136,13 @@ func (r repository) GetByID(id uuid.UUID) (DHT22Reading, error) {
 		return DHT22Reading{}, err
 	}
 	return reading, nil
+}
+
+//GetAggregateByBucket returns a query for an aggregated table view
+func (r repository) GetAggregateByBucket(bucket string) ([]SensorReadingAggregate, error) {
+	var readings []SensorReadingAggregate
+	//TODO: We should validate bucket: 5m 1h 1d
+	sql := fmt.Sprintf("SELECT * FROM dht_readings_%s", bucket)
+	r.database.Raw(sql).Scan(&readings)
+	return readings, nil
 }
