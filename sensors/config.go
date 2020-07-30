@@ -50,6 +50,11 @@ type Config struct {
 	Secret string
 }
 
+//Auth will hold jwt config
+type Auth struct {
+	JWTSecret string
+}
+
 //GetConfig returns a configuration struct
 func GetConfig(cfg config.YamlConfig) Config {
 	return Config{
@@ -72,6 +77,9 @@ func GetConfig(cfg config.YamlConfig) Config {
 			ClientID:    cfg.Mqtt.ClientID,
 			TopicInput:  cfg.Mqtt.TopicInput,
 			TopicOutput: cfg.Mqtt.TopicOutput,
+		},
+		Auth: AuthConfig{
+			JWTSecret: cfg.Auth.JwtSecret,
 		},
 		Secret: cfg.AppSecret,
 	}
