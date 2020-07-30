@@ -90,12 +90,12 @@
 		maxPush(data[0], {
 			t: parseInt(Math.abs(moment(value.time).format('x'))),
             y: tAvg.add(value.t)
-		}, 50);
+		}, 51);
 
 		maxPush(data[1], {
 			t: parseInt(Math.abs(moment(value.time).format('x'))),
             y: hAvg.add(value.h)
-		}, 50);
+		}, 51);
 
 		chart.updateData(data);
 	});
