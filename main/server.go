@@ -35,13 +35,13 @@ func main() {
 		log.Printf("database err %s", err)
 		os.Exit(1)
 	}
+	postgres.Migrate(database)
 
 	server := fiber.New()
 	emitter := event.NewEmitter()
 
-	rest.Router(server, database)
-	postgres.Migrate(database)
 	realtime.Websockets(server)
+	rest.Router(server, database)
 
 	server.Static("/", publicPath)
 
@@ -88,4 +88,6 @@ func main() {
 	log.Fatal(server.Listen(port))
 
 	fmt.Sprintf("app key: %s\n", cnf.Secret)
+
+	defer database.Close()
 }
