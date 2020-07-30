@@ -16,3 +16,6 @@ mqtt:
   user: "user01"
   password: "P@ssw0rD!"
   client_id: "client01"
+
+auth:
+  secret: "7ed09316-e4b2-4b8e-ab2d-5ba8b7bd1e80"
