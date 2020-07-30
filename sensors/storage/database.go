@@ -11,6 +11,7 @@ type Database struct {
 	*gorm.DB
 }
 
+//Close will close the database connection
 func (db *Database) Close() {
 	err := db.DB.Close()
 

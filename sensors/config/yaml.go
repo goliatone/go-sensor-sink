@@ -35,6 +35,11 @@ type MqttConfig struct {
 	TopicOutput string `yaml:"topic_output"`
 }
 
+//AuthConfig holds auth secrets
+type AuthConfig struct {
+	JwtSecret string `yaml:"secret"`
+}
+
 //YamlConfig maps the configuration in the yaml file
 //into a struct
 type YamlConfig struct {
@@ -42,6 +47,7 @@ type YamlConfig struct {
 	Server    ServerConfig   `yaml:"server"`
 	Mqtt      MqttConfig     `yaml:"mqtt"`
 	AppSecret string         `yaml::app_secret_key`
+	Auth      AuthConfig     `yaml:"auth"`
 }
 
 //ReadYaml will load a yaml file from the given path and
