@@ -2,8 +2,9 @@ package rest
 
 import (
 	"sensors/device"
+	"sensors/registry"
+	"sensors/rest/api/authentication"
 	"sensors/sink"
-	"sensors/storage"
 
 	"github.com/gofiber/fiber"
 	fibermiddleware "github.com/gofiber/fiber/middleware"
@@ -11,18 +12,22 @@ import (
 )
 
 //Router exposes the REST router to register our routes with the fiber app
-func Router(fiberApp *fiber.App, db *storage.Database) {
+func Router(app *fiber.App, domain *registry.Domain) {
 
-	apiGroup := fiberApp.Group("/api")
+	apiGroup := app.Group("/api")
 	apiGroup.Use(fibermiddleware.Logger())
 
-	apiRouteGroup(apiGroup, db)
+	authGroup := apiGroup.Group("/auth")
+	authGroup.Post("/login", authentication.Login(domain.Auth))
+
+	authGroup.Post("/user", authentication.Register(domain.Auth))
+
+	apiRouteGroup(apiGroup.(*fiber.Group), domain)
 }
 
-func apiRouteGroup(g *fiber.Group, db *storage.Database) {
+func apiRouteGroup(g *fiber.Group, domain *registry.Domain) {
 	// g.Post("/login")
-	deviceRepo := device.NewRepository(db)
-
+	deviceRepo := domain.Devices
 	////////////////////////////////////////////////////////////
 	// Device
 	////////////////////////////////////////////////////////////
@@ -106,7 +111,8 @@ func apiRouteGroup(g *fiber.Group, db *storage.Database) {
 	////////////////////////////////////////////////////////////
 	// Readings
 	////////////////////////////////////////////////////////////
-	sinkRepo := sink.NewRepository(db)
+	sinkRepo := domain.Readings
+	// sinkRepo := sink.NewRepository(db)
 
 	g.Post("/sensors/reading", func(c *fiber.Ctx) {
 		var reading sink.DHT22Reading
