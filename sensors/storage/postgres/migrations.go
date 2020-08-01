@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"sensors/auth"
 	"sensors/device"
 	"sensors/storage"
 )
@@ -12,6 +13,7 @@ func Migrate(database *storage.Database) {
 	database.DB.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`)
 
 	database.DB.AutoMigrate(
+		auth.User{},
 		device.Device{},
 	)
 }
