@@ -12,8 +12,9 @@ func RegistrationResponse(user *User) map[string]interface{} {
 		"status":  "success",
 		"message": "User registered",
 		"user": map[string]interface{}{
-			"id":    user.ID.String(),
-			"email": user.Email,
+			"id":       user.ID.String(),
+			"email":    user.Email,
+			"username": user.Username,
 		},
 	}
 }
