@@ -14,8 +14,8 @@ type LoginParams struct {
 
 //RegistrationParams parameters sent in to register request
 type RegistrationParams struct {
-	Username string `json:"username"`
 	Email    string `json:"email`
+	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
