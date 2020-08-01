@@ -48,6 +48,7 @@ type Config struct {
 	Server Server
 	Mqtt   Mqtt
 	Secret string
+	Auth   Auth
 }
 
 //Auth will hold jwt config
@@ -78,7 +79,7 @@ func GetConfig(cfg config.YamlConfig) Config {
 			TopicInput:  cfg.Mqtt.TopicInput,
 			TopicOutput: cfg.Mqtt.TopicOutput,
 		},
-		Auth: AuthConfig{
+		Auth: Auth{
 			JWTSecret: cfg.Auth.JwtSecret,
 		},
 		Secret: cfg.AppSecret,
