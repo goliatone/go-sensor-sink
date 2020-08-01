@@ -54,7 +54,7 @@ func Register(domain auth.Interactor) func(*fiber.Ctx) {
 			return
 		}
 
-		_ = ctx.JSON(auth.RegistrationResponse(&u))
+		_ = ctx.Status(fiber.StatusOK).JSON(auth.RegistrationResponse(&u))
 
 	}
 }

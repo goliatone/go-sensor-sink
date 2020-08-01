@@ -55,7 +55,7 @@ func ErrResponse(err error) ErrHTTP {
 	default:
 		e = ErrHTTP{
 			Error:   "Unknown",
-			Message: "Something Broke Server",
+			Message: "Internal Server Error",
 			Status:  http.StatusInternalServerError,
 		}
 	}
