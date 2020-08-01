@@ -27,13 +27,13 @@ func NewInteractor(config sensors.Auth, authRepo Repository) Interactor {
 	}
 }
 
-func (h interactor) AuthenticateByEmail(email, password string) (SignedUser, error) {
-	user, err := h.repository.GetByEmail(email)
+func (i interactor) AuthenticateByEmail(email, password string) (SignedUser, error) {
+	user, err := i.repository.GetByEmail(email)
 	if err != nil {
 		return SignedUser{}, err
 	}
 
-	token, err := h.authenticateUser(&user, password)
+	token, err := i.authenticateUser(&user, password)
 	if err != nil {
 		return SignedUser{}, err
 	}
@@ -41,21 +41,21 @@ func (h interactor) AuthenticateByEmail(email, password string) (SignedUser, err
 	return SignedUser{UserID: user.ID.String(), Token: token}, nil
 }
 
-func (h interactor) authenticateUser(user *User, password string) (string, error) {
-	if isValidPassword := h.comparePasswords(user.Password, []byte(password)); !isValidPassword {
+func (i interactor) authenticateUser(user *User, password string) (string, error) {
+	if isValidPassword := i.comparePasswords(user.Password, []byte(password)); !isValidPassword {
 		msg := fmt.Sprintf("user or password invalid")
 		return "", ErrUnauthorized{Message: msg}
 	}
 
 	tok := generateToken(user)
-	token, err := getTokenString(h.config.JWTSecret, tok)
+	token, err := getTokenString(i.config.JWTSecret, tok)
 	if err != nil {
 		return "", err
 	}
 	return token, nil
 }
 
-func (h interactor) comparePasswords(hash string, password []byte) bool {
+func (i interactor) comparePasswords(hash string, password []byte) bool {
 	byteHash := []byte(hash)
 
 	err := bcrypt.CompareHashAndPassword(byteHash, password)
@@ -66,23 +66,23 @@ func (h interactor) comparePasswords(hash string, password []byte) bool {
 	return true
 }
 
-func (h interactor) Register(user *User) (User, error) {
-	passHash, err := h.hashUserPassword([]byte(user.Password))
+func (i interactor) Register(user *User) (User, error) {
+	passHash, err := i.hashUserPassword([]byte(user.Password))
 	if err != nil {
 		return User{}, err
 	}
 
 	user.Password = passHash
-	u, err := h.repository.Add(*user)
+	u, err := i.repository.Add(*user)
 	if err != nil {
 		return User{}, err
 	}
 
-	// h.postNewUserToChannel(&u)
+	// i.postNewUserToChannel(&u)
 	return u, nil
 }
 
-func (h interactor) hashUserPassword(password []byte) (string, error) {
+func (i interactor) hashUserPassword(password []byte) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword(password, 8)
 	if err != nil {
 		hashErr := ErrHashPassword{password: string(password), message: err.Error()}
