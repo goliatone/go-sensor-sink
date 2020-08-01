@@ -5,39 +5,39 @@ import (
 	"sensors/storage"
 )
 
-//SearchParameters handles querying AuthUser
+//SearchParameters handles querying User
 type SearchParameters struct {
 }
 
-//Repository is the interface to handle AuthUser persistence
+//Repository is the interface to handle User persistence
 type Repository interface {
-	Add(AuthUser) (AuthUser, error)
-	Delete(AuthUser) error
-	// Get(SearchParameters) ([]AuthUser, error)
-	GetByEmail(string) (AuthUser, error)
-	GetByUsername(string) (AuthUser, error)
+	Add(User) (User, error)
+	Delete(User) error
+	// Get(SearchParameters) ([]User, error)
+	GetByEmail(string) (User, error)
+	GetByUsername(string) (User, error)
 }
 
 type repository struct {
 	database *storage.Database
 }
 
-//NewRepository creates a new AuthUser repository instance
+//NewRepository creates a new User repository instance
 func NewRepository(db *storage.Database) Repository {
 	return &repository{database: db}
 }
 
 //Add a new user record to the DB
 
-func (r repository) Add(user AuthUser) (AuthUser, error) {
+func (r repository) Add(user User) (User, error) {
 	result := r.database.Create(&user)
 	if err := result.Error; err != nil {
-		return AuthUser{}, NewErrUnexpected(err)
+		return User{}, NewErrUnexpected(err)
 	}
 	return user, nil
 }
 
-func (r repository) Delete(user AuthUser) error {
+func (r repository) Delete(user User) error {
 	result := r.database.Delete(&user)
 	if err := result.Error; err != nil {
 		return NewErrUnexpected(result.Error)
@@ -46,34 +46,34 @@ func (r repository) Delete(user AuthUser) error {
 }
 
 //GetByEmail will fetch a user by email
-func (r repository) GetByEmail(email string) (AuthUser, error) {
-	var user AuthUser
+func (r repository) GetByEmail(email string) (User, error) {
+	var user User
 
 	result := r.database.Where("email = ?", email).First(&user)
 	if result.RecordNotFound() {
-		msg := fmt.Sprintf("AuthUser with email \"%s\" not found", email)
-		return AuthUser{}, NewErrUserNotFound(msg)
+		msg := fmt.Sprintf("User with email \"%s\" not found", email)
+		return User{}, NewErrUserNotFound(msg)
 	}
 
 	if err := result.Error; err != nil {
-		return AuthUser{}, err
+		return User{}, err
 	}
 
 	return user, nil
 }
 
 //GetByUsername will fetch a user by username
-func (r repository) GetByUsername(username string) (AuthUser, error) {
-	var user AuthUser
+func (r repository) GetByUsername(username string) (User, error) {
+	var user User
 
 	result := r.database.Where("username = ?", username).First(&user)
 	if result.RecordNotFound() {
-		msg := fmt.Sprintf("AuthUser with username \"%s\" not found", username)
-		return AuthUser{}, NewErrUserNotFound(msg)
+		msg := fmt.Sprintf("User with username \"%s\" not found", username)
+		return User{}, NewErrUserNotFound(msg)
 	}
 
 	if err := result.Error; err != nil {
-		return AuthUser{}, err
+		return User{}, err
 	}
 
 	return user, nil
