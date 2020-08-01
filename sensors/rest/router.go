@@ -33,70 +33,18 @@ func Router(app *fiber.App, domain *registry.Domain, config sensors.Config) {
 		ctx.JSON(response)
 	})
 
-	// apiGroup.Post("/login")
-	// deviceRepo := domain.Devices
+	v1 := apiGroup.Group("/v1")
+	v1.Use(middleware.AuthByBearerToken(secret))
 	////////////////////////////////////////////////////////////
 	// Device
 	////////////////////////////////////////////////////////////
 
-	apiGroup.Get("/device", middleware.AuthByBearerToken(secret), devices.Get(domain.Devices))
-	apiGroup.Get("/device/:id", middleware.AuthByBearerToken(secret), devices.GetByID(domain.Devices))
-	apiGroup.Post("/device", middleware.AuthByBearerToken(secret), devices.Create(domain.Devices))
-	/*
-		apiGroup.Post("/device", func(c *fiber.Ctx) {
-			var item device.Device
-			if err := c.BodyParser(&item); err != nil {
-				c.Status(503).Send(err)
-				return
-			}
+	v1.Post("/device", devices.Create(domain.Devices))
+	v1.Get("/device/:id", devices.Read(domain.Devices))
+	v1.Put("/device/:id", devices.Update(domain.Devices))
+	v1.Delete("/device/:id", devices.Delete(domain.Devices))
+	v1.Get("/device", devices.List(domain.Devices))
 
-			d, err := deviceRepo.Add(item)
-			if err != nil {
-				c.Status(503).Send(err)
-				return
-			}
-
-			c.JSON(d)
-		})
-
-		apiGroup.Put("/device/:id", func(c *fiber.Ctx) {
-			id, _ := uuid.FromString(c.Params("id"))
-
-			var item device.Device
-
-			item, err := deviceRepo.GetByID(id)
-			if err != nil {
-				c.Status(503).Send(err)
-				return
-			}
-
-			if err := c.BodyParser(&item); err != nil {
-				c.Status(503).Send(err)
-				return
-			}
-
-			if err := deviceRepo.Update(item); err != nil {
-				c.Status(503).Send(err)
-				return
-			}
-
-			c.JSON(item)
-		})
-
-		apiGroup.Delete("/device/:id", func(c *fiber.Ctx) {
-			id, _ := uuid.FromString(c.Params("id"))
-
-			err := deviceRepo.DeleteByID(id)
-			if err != nil {
-				res := make(map[string]interface{})
-				res["error"] = true
-				res["message"] = err.Error()
-				c.JSON(res)
-				return
-			}
-			c.Send("OK")
-		})
-	*/
 	////////////////////////////////////////////////////////////
 	// Readings
 	////////////////////////////////////////////////////////////
