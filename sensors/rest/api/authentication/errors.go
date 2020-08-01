@@ -3,6 +3,7 @@ package authentication
 import (
 	"net/http"
 	"reflect"
+	"sensors/auth"
 )
 
 //ErrInvalidParams error
@@ -28,6 +29,24 @@ func ErrResponse(err error) ErrHTTP {
 
 	switch err.(type) {
 	case ErrInvalidParams:
+		e = ErrHTTP{
+			Error:   reflect.TypeOf(err).Name(),
+			Message: err.Error(),
+			Status:  http.StatusBadRequest,
+		}
+	case *auth.ErrTokenParsing:
+		e = ErrHTTP{
+			Error:   "ErrServerError",
+			Message: err.Error(),
+			Status:  http.StatusBadRequest,
+		}
+	case *auth.ErrUnauthorized:
+		e = ErrHTTP{
+			Error:   reflect.TypeOf(err).Name(),
+			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
+		}
+	case *auth.ErrUserNotFound:
 		e = ErrHTTP{
 			Error:   reflect.TypeOf(err).Name(),
 			Message: err.Error(),
