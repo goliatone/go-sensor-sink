@@ -64,6 +64,7 @@ func createUserObject(params RegistrationParams) *auth.User {
 		ID:       uuid.NewV4(),
 		Email:    params.Email,
 		Password: params.Password,
+		Username: params.Username,
 	}
 	return &u
 }
