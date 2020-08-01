@@ -8,19 +8,19 @@ import (
 )
 
 //GetByID returns a device by ID
-func GetByID(domain device.Interactor) func(*fiber.Ctx) {
+func Read(domain device.Interactor) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		id, err := uuid.FromString(ctx.Params("id"))
 		if err != nil {
 			errHTTP := ErrResponse(err)
-			_ = ctx.Status(errHTTP.Status).JSON(errHTTP)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
 			return
 		}
 
 		record, err := domain.GetByID(id)
 		if err != nil {
 			errHTTP := ErrResponse(err)
-			_ = ctx.Status(errHTTP.Status).JSON(errHTTP)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
 			return
 		}
 
@@ -28,8 +28,8 @@ func GetByID(domain device.Interactor) func(*fiber.Ctx) {
 	}
 }
 
-//Get returns a list of devices
-func Get(domain device.Interactor) func(*fiber.Ctx) {
+//Read returns a list of devices
+func List(domain device.Interactor) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		records, err := domain.Get()
 		if err != nil {
@@ -59,5 +59,59 @@ func Create(domain device.Interactor) func(*fiber.Ctx) {
 		}
 
 		ctx.Status(fiber.StatusOK).JSON(device.DeviceResponse(record))
+	}
+}
+
+//Update will update a given record
+func Update(domain device.Interactor) func(*fiber.Ctx) {
+	return func(ctx *fiber.Ctx) {
+		id, err := uuid.FromString(ctx.Params("id"))
+		if err != nil {
+			errHTTP := ErrResponse(err)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
+			return
+		}
+
+		var item device.Device
+		item, err = domain.GetByID(id)
+		if err != nil {
+			errHTTP := ErrResponse(err)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
+			return
+		}
+
+		if err := ctx.BodyParser(&item); err != nil {
+			errHTTP := ErrResponse(err)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
+			return
+		}
+
+		if err := domain.Update(item); err != nil {
+			errHTTP := ErrResponse(err)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
+			return
+		}
+
+		ctx.Status(fiber.StatusOK).JSON(device.DeviceResponse(item))
+	}
+}
+
+//Delete will delete by id
+func Delete(domain device.Interactor) func(*fiber.Ctx) {
+	return func(ctx *fiber.Ctx) {
+		id, err := uuid.FromString(ctx.Params("id"))
+		if err != nil {
+			errHTTP := ErrResponse(err)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
+			return
+		}
+
+		if err := domain.Delete(id); err != nil {
+			errHTTP := ErrResponse(err)
+			ctx.Status(errHTTP.Status).JSON(errHTTP)
+			return
+		}
+
+		ctx.Status(fiber.StatusOK).Send("OK")
 	}
 }
