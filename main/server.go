@@ -11,6 +11,7 @@ import (
 	"sensors/event"
 	"sensors/pubsub"
 	"sensors/realtime"
+	"sensors/registry"
 	"sensors/rest"
 	"sensors/sink"
 	"sensors/storage/postgres"
@@ -39,15 +40,14 @@ func main() {
 
 	server := fiber.New()
 	emitter := event.NewEmitter()
+	domain := registry.NewDomain(cnf, database)
 
+	rest.Router(server, domain)
 	realtime.Websockets(server)
-	rest.Router(server, database)
-
-	server.Static("/", publicPath)
+	pubsub.SetConfig(&cnf.Mqtt)
 
 	//move to package
-	sinkRepo := sink.NewRepository(database)
-	pubsub.SetConfig(&cnf.Mqtt)
+	server.Static("/", publicPath)
 
 	mqttClient := pubsub.AddCommandHandler(0, func(mc mqtt.Client, msg mqtt.Message) {
 		//TODO: We get all messages, we should actually prefix it with server id so
@@ -72,7 +72,7 @@ func main() {
 
 	emitter.On("mqtt.event", func(args ...interface{}) {
 		reading := args[0].(sink.DHT22Reading)
-		_, err = sinkRepo.Add(reading)
+		_, err = domain.Readings.Add(reading)
 
 		if err != nil {
 			log.Println("error adding reading:" + err.Error())
