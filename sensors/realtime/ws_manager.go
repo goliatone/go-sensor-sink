@@ -26,6 +26,7 @@ func (w *WebsocketManager) AddSocketAlias(alias string, uuid string) {
 func (w *WebsocketManager) RemoveSocket(uuid string) {
 	if _, ok := w.sockets[uuid]; ok {
 		delete(w.sockets, uuid)
+
 		for alias, socketUUID := range w.clients {
 			if socketUUID == uuid {
 				RemoveSocketAlias(alias)
