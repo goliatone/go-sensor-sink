@@ -42,7 +42,7 @@ func main() {
 	emitter := event.NewEmitter()
 	domain := registry.NewDomain(cnf, database)
 
-	rest.Router(server, domain)
+	rest.Router(server, domain, cnf)
 	realtime.Websockets(server)
 	pubsub.SetConfig(&cnf.Mqtt)
 
