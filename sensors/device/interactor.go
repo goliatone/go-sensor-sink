@@ -7,6 +7,8 @@ type Interactor interface {
 	Get() ([]Device, error)
 	GetByID(uuid.UUID) (Device, error)
 	Create(Device) (Device, error)
+	Update(Device) error
+	Delete(uuid.UUID) error
 }
 
 type interactor struct {
@@ -43,4 +45,14 @@ func (i interactor) Create(item Device) (Device, error) {
 		return Device{}, err
 	}
 	return record, nil
+}
+
+func (i interactor) Update(item Device) error {
+	err := i.repository.Update(item)
+	return err
+}
+
+func (i interactor) Delete(id uuid.UUID) error {
+	err := i.repository.DeleteByID(id)
+	return err
 }
