@@ -1,9 +1,11 @@
 package rest
 
 import (
+	"sensors"
 	"sensors/device"
 	"sensors/registry"
 	"sensors/rest/api/authentication"
+	"sensors/rest/api/middleware"
 	"sensors/sink"
 
 	"github.com/gofiber/fiber"
@@ -12,7 +14,7 @@ import (
 )
 
 //Router exposes the REST router to register our routes with the fiber app
-func Router(app *fiber.App, domain *registry.Domain) {
+func Router(app *fiber.App, domain *registry.Domain, config sensors.Config) {
 
 	apiGroup := app.Group("/api")
 	apiGroup.Use(fibermiddleware.Logger())
@@ -21,6 +23,15 @@ func Router(app *fiber.App, domain *registry.Domain) {
 	authGroup.Post("/login", authentication.Login(domain.Auth))
 
 	authGroup.Post("/user", authentication.Register(domain.Auth))
+
+	authGroup.Post("/test", middleware.AuthByBearerToken(config.Auth.JWTSecret), func(ctx *fiber.Ctx) {
+		response := map[string]interface{}{
+			"success": true,
+			"user":    ctx.Locals("user"),
+		}
+
+		ctx.JSON(response)
+	})
 
 	apiRouteGroup(apiGroup.(*fiber.Group), domain)
 }
