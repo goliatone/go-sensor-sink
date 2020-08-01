@@ -28,15 +28,15 @@ func NewErrHTTP(err error) ErrHTTP {
 		}
 	default:
 		return ErrHTTP{
-			Error:  reflect.TypeOf(err).Name(),
-			Mesage: err.Error(),
-			Status: http.StatusUnauthorized,
+			Error:   reflect.TypeOf(err).Name(),
+			Message: err.Error(),
+			Status:  http.StatusUnauthorized,
 		}
 	}
 }
 
-//AuthByBearertoken middleware function to auth users
-func AuthByBearertoken(secret string) func(*fiber.Ctx) {
+//AuthByBearerToken middleware function to auth users
+func AuthByBearerToken(secret string) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
 		header := ctx.Get("Authorization")
 		if header == "" {
