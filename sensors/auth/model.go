@@ -15,7 +15,7 @@ type LoginInput struct {
 //User model
 type User struct {
 	ID        uuid.UUID `json:"id"`
-	Username  string    `json:"username"`
+	Username  string    `json:"username" gorm:"not null; unique_index"`
 	Email     string    `json:"email" gorm:"not null; unique_index"`
 	Password  string    `json:"password" gorm:"not null"`
 	CreatedAt time.Time `json:"createdAt"`
