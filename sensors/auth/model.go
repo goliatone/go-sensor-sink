@@ -8,7 +8,7 @@ type LoginInput struct {
 	Password string `json:"password"`
 }
 
-type AuthUser struct {
+type User struct {
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"username"`
 	Email    string    `json:"email"`
