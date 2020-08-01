@@ -29,7 +29,7 @@ func (w *WebsocketManager) RemoveSocket(uuid string) {
 
 		for alias, socketUUID := range w.clients {
 			if socketUUID == uuid {
-				RemoveSocketAlias(alias)
+				w.RemoveSocketAlias(alias)
 			}
 		}
 	}
