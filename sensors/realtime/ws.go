@@ -34,9 +34,6 @@ func Websockets(server *fiber.App) {
 	fbs.On(fbs.EventDisconnect, func(e *fbs.EventPayload) {
 		userID := e.Kws.Locals("user_id")
 		wsm.RemoveSocket(e.Kws.UUID)
-		if userID != "" {
-			wsm.RemoveSocketAlias(userID.(string))
-		}
 	})
 
 	fbs.On("close", func(payload *fbs.EventPayload) {

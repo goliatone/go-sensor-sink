@@ -26,6 +26,18 @@ func (w *WebsocketManager) AddSocketAlias(alias string, uuid string) {
 func (w *WebsocketManager) RemoveSocket(uuid string) {
 	if _, ok := w.sockets[uuid]; ok {
 		delete(w.sockets, uuid)
+		for alias, socketUUID := range w.clients {
+			if socketUUID == uuid {
+				RemoveSocketAlias(alias)
+			}
+		}
+	}
+}
+
+//RemoveSocketAlias remove a socket alias
+func (w *WebsocketManager) RemoveSocketAlias(alias string) {
+	if _, ok := w.clients[alias]; ok {
+		delete(w.clients, alias)
 	}
 }
 
@@ -38,13 +50,6 @@ func (w *WebsocketManager) EmitTo(alias string, data []byte) {
 				fmt.Printf("message send error %s: %v", uuid, err)
 			}
 		}
-	}
-}
-
-//RemoveSocketAlias remove a socket alias
-func (w *WebsocketManager) RemoveSocketAlias(alias string) {
-	if _, ok := w.clients[alias]; ok {
-		delete(w.clients, alias)
 	}
 }
 
