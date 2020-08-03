@@ -1,17 +1,17 @@
 package device
 
-//DeviceResponse format a device to return
-func DeviceResponse(device Device) map[string]interface{} {
+//ReadResponse format a single record response
+func ReadResponse(record Device) map[string]interface{} {
 	return map[string]interface{}{
 		"status": "success",
-		"data":   device,
+		"data":   record,
 	}
 }
 
-//ListDevicesResponse format a list of devices
-func ListDevicesResponse(devices []Device) map[string]interface{} {
+//ListResponse format a list of records
+func ListResponse(records []Device) map[string]interface{} {
 	return map[string]interface{}{
 		"status": "success",
-		"data":   devices,
+		"data":   records,
 	}
 }
