@@ -20,19 +20,19 @@ func ErrResponse(err error) ErrHTTP {
 	switch err.(type) {
 	case *sink.ErrReadingExists:
 		e = ErrHTTP{
-			Error:   reflect.TypeOf(err).Name(),
+			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
 			Status:  http.StatusBadRequest,
 		}
 	case *sink.ErrReadingNotFound:
 		e = ErrHTTP{
-			Error:   reflect.TypeOf(err).Name(),
+			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
 			Status:  http.StatusBadRequest,
 		}
 	case *sink.ErrUnexpected:
 		e = ErrHTTP{
-			Error:   reflect.TypeOf(err).Name(),
+			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
 			Status:  http.StatusBadRequest,
 		}
