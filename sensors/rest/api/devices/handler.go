@@ -24,20 +24,20 @@ func Read(domain device.Interactor) func(*fiber.Ctx) {
 			return
 		}
 
-		ctx.Status(fiber.StatusOK).JSON(device.DeviceResponse(record))
+		ctx.Status(fiber.StatusOK).JSON(device.ReadResponse(record))
 	}
 }
 
-//Read returns a list of devices
+//List returns a list of devices
 func List(domain device.Interactor) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
-		records, err := domain.Get()
+		records, err := domain.Read()
 		if err != nil {
 			errHTTP := ErrResponse(err)
 			ctx.Status(errHTTP.Status).JSON(errHTTP)
 			return
 		}
-		ctx.Status(fiber.StatusOK).JSON(device.ListDevicesResponse(records))
+		ctx.Status(fiber.StatusOK).JSON(device.ListResponse(records))
 	}
 }
 
@@ -58,7 +58,7 @@ func Create(domain device.Interactor) func(*fiber.Ctx) {
 			return
 		}
 
-		ctx.Status(fiber.StatusOK).JSON(device.DeviceResponse(record))
+		ctx.Status(fiber.StatusOK).JSON(device.ReadResponse(record))
 	}
 }
 
@@ -92,7 +92,7 @@ func Update(domain device.Interactor) func(*fiber.Ctx) {
 			return
 		}
 
-		ctx.Status(fiber.StatusOK).JSON(device.DeviceResponse(item))
+		ctx.Status(fiber.StatusOK).JSON(device.ReadResponse(item))
 	}
 }
 

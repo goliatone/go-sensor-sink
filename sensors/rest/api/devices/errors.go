@@ -6,7 +6,7 @@ import (
 	"sensors/device"
 )
 
-//ErrHTTP response rror
+//ErrHTTP response error
 type ErrHTTP struct {
 	Error   string `json:"error"`
 	Message string `json:"message"`
