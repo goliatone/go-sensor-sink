@@ -4,11 +4,11 @@ import uuid "github.com/satori/go.uuid"
 
 //Interactor implements interactions
 type Interactor interface {
-	Get() ([]Device, error)
-	GetByID(uuid.UUID) (Device, error)
 	Create(Device) (Device, error)
+	Read() ([]Device, error)
 	Update(Device) error
 	Delete(uuid.UUID) error
+	GetByID(uuid.UUID) (Device, error)
 }
 
 type interactor struct {
@@ -31,12 +31,12 @@ func (i interactor) GetByID(id uuid.UUID) (Device, error) {
 	return item, nil
 }
 
-func (i interactor) Get() ([]Device, error) {
-	items, err := i.repository.Get()
+func (i interactor) Read() ([]Device, error) {
+	records, err := i.repository.Get()
 	if err != nil {
 		return make([]Device, 0), err
 	}
-	return items, nil
+	return records, nil
 }
 
 func (i interactor) Create(item Device) (Device, error) {
