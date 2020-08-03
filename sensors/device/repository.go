@@ -108,8 +108,8 @@ func (r repository) GetByHardwareID(hid string) (Device, error) {
 }
 
 func (r repository) Update(device Device) error {
-	var d Device
-	result := r.database.Model(&d).Omit("id").Update(device)
+	var model Device
+	result := r.database.Model(&model).Omit("id").Update(device)
 
 	return result.Error
 }
