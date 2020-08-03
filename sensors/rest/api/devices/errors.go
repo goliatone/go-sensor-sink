@@ -26,7 +26,7 @@ func ErrResponse(err error) ErrHTTP {
 		}
 	case *device.ErrDeviceExists:
 		e = ErrHTTP{
-			Error:   reflect.TypeOf(err).Name(),
+			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
 			Status:  http.StatusBadRequest,
 		}
