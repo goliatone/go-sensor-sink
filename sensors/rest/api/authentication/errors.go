@@ -36,19 +36,19 @@ func ErrResponse(err error) ErrHTTP {
 		}
 	case *auth.ErrTokenParsing:
 		e = ErrHTTP{
-			Error:   "ErrServerError",
+			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
 			Status:  http.StatusBadRequest,
 		}
 	case *auth.ErrUnauthorized:
 		e = ErrHTTP{
-			Error:   reflect.TypeOf(err).Name(),
+			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
 			Status:  http.StatusUnauthorized,
 		}
 	case *auth.ErrUserNotFound:
 		e = ErrHTTP{
-			Error:   reflect.TypeOf(err).Name(),
+			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
 			Status:  http.StatusBadRequest,
 		}
