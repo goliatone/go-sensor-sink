@@ -15,6 +15,7 @@ import (
 type Repository interface {
 	Add(DHT22Reading) (DHT22Reading, error)
 	Delete(DHT22Reading) error
+	Update(DHT22Reading) error
 	Get(SearchParameters) ([]DHT22Reading, error)
 	GetByID(uuid.UUID) (DHT22Reading, error)
 	GetAggregateByBucket(string) ([]SensorReadingAggregate, error)
@@ -50,6 +51,13 @@ func (r repository) Add(reading DHT22Reading) (DHT22Reading, error) {
 	}
 
 	return reading, nil
+}
+
+func (r repository) Update(reading DHT22Reading) error {
+	var model DHT22Reading
+	result := r.database.Model(&model).Update(model)
+	// result := r.database.Model(&model).Omit("id").Update(model)
+	return result.Error
 }
 
 func (r repository) Delete(reading DHT22Reading) error {
