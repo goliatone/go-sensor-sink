@@ -6,17 +6,24 @@ import (
 	"sensors/rest/api/authentication"
 	"sensors/rest/api/devices"
 	"sensors/rest/api/middleware"
-	"sensors/sink"
+	"sensors/rest/api/readings"
 
 	"github.com/gofiber/fiber"
-	fibermiddleware "github.com/gofiber/fiber/middleware"
+	// fibermiddleware "github.com/gofiber/fiber/middleware"
 )
 
 //Router exposes the REST router to register our routes with the fiber app
 func Router(app *fiber.App, domain *registry.Domain, config sensors.Config) {
 
 	apiGroup := app.Group("/api")
-	apiGroup.Use(fibermiddleware.Logger())
+	//read from config sensors.Config.App.UseLogger
+	// apiGroup.Use(fibermiddleware.Logger())
+
+	apiGroup.Get("/status", func(ctx *fiber.Ctx) {
+		ctx.Status(fiber.StatusOK).JSON(map[string]interface{}{
+			"status": "online",
+		})
+	})
 
 	authGroup := apiGroup.Group("/auth")
 	authGroup.Post("/login", authentication.Login(domain.Auth))
@@ -35,6 +42,7 @@ func Router(app *fiber.App, domain *registry.Domain, config sensors.Config) {
 
 	v1 := apiGroup.Group("/v1")
 	v1.Use(middleware.AuthByBearerToken(secret))
+
 	////////////////////////////////////////////////////////////
 	// Device
 	////////////////////////////////////////////////////////////
@@ -48,43 +56,8 @@ func Router(app *fiber.App, domain *registry.Domain, config sensors.Config) {
 	////////////////////////////////////////////////////////////
 	// Readings
 	////////////////////////////////////////////////////////////
-	sinkRepo := domain.Readings
-	// sinkRepo := sink.NewRepository(db)
 
-	apiGroup.Post("/sensors/reading", func(c *fiber.Ctx) {
-		var reading sink.DHT22Reading
-		if err := c.BodyParser(&reading); err != nil {
-			c.Status(503).Send(err)
-			return
-		}
-
-		reading, err := sinkRepo.Add(reading)
-		if err != nil {
-			c.Status(503).Send(err)
-			return
-		}
-		c.JSON(reading)
-	})
-
-	apiGroup.Get("/sensors/readings", func(c *fiber.Ctx) {
-		qs := sink.NewSearchParameters(c)
-
-		readings, err := sinkRepo.Get(qs)
-		if err != nil {
-			c.Status(503).Send(err)
-			return
-		}
-		c.JSON(readings)
-	})
-
-	apiGroup.Get("/sensors/readings/:bucket", func(c *fiber.Ctx) {
-		bucket := c.Params("bucket")
-
-		items, err := sinkRepo.GetAggregateByBucket(bucket)
-		if err != nil {
-			c.Status(503).Send(err)
-			return
-		}
-		c.JSON(items)
-	})
+	v1.Post("/sensors/reading", readings.Create(domain.Readings))
+	v1.Get("/sensors/readings", readings.List(domain.Readings))
+	v1.Get("/sensors/readings/:bucket", readings.ListByBucket(domain.Readings))
 }
