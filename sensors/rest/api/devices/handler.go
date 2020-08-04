@@ -10,14 +10,8 @@ import (
 //GetByID returns a device by ID
 func Read(domain device.Interactor) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
-		id, err := uuid.FromString(ctx.Params("id"))
-		if err != nil {
-			errHTTP := ErrResponse(err)
-			ctx.Status(errHTTP.Status).JSON(errHTTP)
-			return
-		}
-
-		record, err := domain.GetByID(id)
+		recordID := uuid.FromStringOrNil(ctx.Params("id"))
+		record, err := domain.GetByID(recordID)
 		if err != nil {
 			errHTTP := ErrResponse(err)
 			ctx.Status(errHTTP.Status).JSON(errHTTP)
@@ -65,15 +59,10 @@ func Create(domain device.Interactor) func(*fiber.Ctx) {
 //Update will update a given record
 func Update(domain device.Interactor) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
-		id, err := uuid.FromString(ctx.Params("id"))
-		if err != nil {
-			errHTTP := ErrResponse(err)
-			ctx.Status(errHTTP.Status).JSON(errHTTP)
-			return
-		}
+		recordID := uuid.FromStringOrNil(ctx.Params("id"))
 
 		var item device.Device
-		item, err = domain.GetByID(id)
+		item, err := domain.GetByID(recordID)
 		if err != nil {
 			errHTTP := ErrResponse(err)
 			ctx.Status(errHTTP.Status).JSON(errHTTP)
@@ -99,14 +88,9 @@ func Update(domain device.Interactor) func(*fiber.Ctx) {
 //Delete will delete by id
 func Delete(domain device.Interactor) func(*fiber.Ctx) {
 	return func(ctx *fiber.Ctx) {
-		id, err := uuid.FromString(ctx.Params("id"))
-		if err != nil {
-			errHTTP := ErrResponse(err)
-			ctx.Status(errHTTP.Status).JSON(errHTTP)
-			return
-		}
+		recordID := uuid.FromStringOrNil(ctx.Params("id"))
 
-		if err := domain.Delete(id); err != nil {
+		if err := domain.Delete(recordID); err != nil {
 			errHTTP := ErrResponse(err)
 			ctx.Status(errHTTP.Status).JSON(errHTTP)
 			return
