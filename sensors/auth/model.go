@@ -3,7 +3,7 @@ package auth
 import (
 	"time"
 
-	"github.com/twinj/uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 //LoginInput login payload
