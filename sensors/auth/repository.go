@@ -52,7 +52,7 @@ func (r repository) GetByEmail(email string) (User, error) {
 	result := r.database.Where("email = ?", email).First(&user)
 	if result.RecordNotFound() {
 		msg := fmt.Sprintf("User with email \"%s\" not found", email)
-		return User{}, NewErrUserNotFound(msg)
+		return User{}, NewErrRecordNotFound(msg)
 	}
 
 	if err := result.Error; err != nil {
@@ -69,7 +69,7 @@ func (r repository) GetByUsername(username string) (User, error) {
 	result := r.database.Where("username = ?", username).First(&user)
 	if result.RecordNotFound() {
 		msg := fmt.Sprintf("User with username \"%s\" not found", username)
-		return User{}, NewErrUserNotFound(msg)
+		return User{}, NewErrRecordNotFound(msg)
 	}
 
 	if err := result.Error; err != nil {
