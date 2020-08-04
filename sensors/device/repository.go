@@ -32,7 +32,7 @@ func (r repository) Add(device Device) (Device, error) {
 	record := r.database.Where(Device{HardwareID: device.HardwareID}).First(&d)
 	if record.RecordNotFound() == false {
 		log.Printf("cant create device already exists %v", d)
-		return d, &ErrDeviceExists{inDevice: device, outDevice: d}
+		return d, &ErrRecordExists{inDevice: device, outDevice: d}
 	}
 
 	result := r.database.Where(Device{HardwareID: device.HardwareID}).Assign(device).FirstOrCreate(&d)
@@ -55,8 +55,8 @@ func (r repository) DeleteByID(id uuid.UUID) error {
 	var device Device
 	result := r.database.Where("id = ?", id.String()).First(&device)
 	if result.RecordNotFound() {
-		msg := fmt.Sprintf("device with id %v not found", id.String())
-		return ErrDeviceNotFound{message: msg}
+		msg := fmt.Sprintf("record with id %v not found", id.String())
+		return ErrRecordNotFound{message: msg}
 	}
 	if err := result.Error; err != nil {
 		return NewErrUnexpected(result.Error)
@@ -81,7 +81,7 @@ func (r repository) GetByID(id uuid.UUID) (Device, error) {
 
 	if result.RecordNotFound() {
 		msg := fmt.Sprintf("device with id %v not found", id.String())
-		return Device{}, ErrDeviceNotFound{message: msg}
+		return Device{}, ErrRecordNotFound{message: msg}
 	}
 
 	if err := result.Error; err != nil {
@@ -97,7 +97,7 @@ func (r repository) GetByHardwareID(hid string) (Device, error) {
 
 	if result.RecordNotFound() {
 		msg := fmt.Sprintf("device with hardware id %v not found", hid)
-		return Device{}, ErrDeviceNotFound{message: msg}
+		return Device{}, ErrRecordNotFound{message: msg}
 	}
 
 	if err := result.Error; err != nil {
