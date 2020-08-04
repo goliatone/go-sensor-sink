@@ -2,22 +2,22 @@ package device
 
 import "fmt"
 
-// ErrDeviceNotFound
-type ErrDeviceNotFound struct {
+// ErrRecordNotFound
+type ErrRecordNotFound struct {
 	message string
 }
 
-func (err ErrDeviceNotFound) Error() string {
+func (err ErrRecordNotFound) Error() string {
 	return err.message
 }
 
-type ErrDeviceExists struct {
+type ErrRecordExists struct {
 	message   string
 	inDevice  Device
 	outDevice Device
 }
 
-func (err *ErrDeviceExists) Error() string {
+func (err *ErrRecordExists) Error() string {
 	err.message = "device exists"
 
 	if err.outDevice.ID == err.inDevice.ID {
