@@ -46,7 +46,7 @@ func ErrResponse(err error) ErrHTTP {
 			Message: err.Error(),
 			Status:  http.StatusUnauthorized,
 		}
-	case *auth.ErrUserNotFound:
+	case *auth.ErrRecordNotFound:
 		e = ErrHTTP{
 			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
