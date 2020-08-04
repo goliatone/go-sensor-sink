@@ -8,6 +8,7 @@ import (
 
 	"sensors"
 	"sensors/config"
+	"sensors/data"
 	"sensors/event"
 	"sensors/pubsub"
 	"sensors/realtime"
@@ -42,7 +43,18 @@ func main() {
 	server.Settings.Prefork = true
 
 	emitter := event.NewEmitter()
-	domain := registry.NewDomain(cnf, database)
+	channels := registry.NewChannels()
+	domain := registry.NewDomain(cnf, database, channels)
+
+	go (func(userChan data.ChanNewUsers) {
+		for {
+			select {
+			case user := <-userChan.Reader:
+				log.Printf("We created a new User: %s!", user.UserID)
+				return
+			}
+		}
+	})(channels.ChannelNewUsers)
 
 	rest.Router(server, domain, cnf)
 	realtime.Websockets(server)
