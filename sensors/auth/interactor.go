@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sensors"
+	"sensors/data"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,15 +16,17 @@ type Interactor interface {
 }
 
 type interactor struct {
-	config     sensors.Auth
-	repository Repository
+	config      sensors.Auth
+	repository  Repository
+	userChannel data.ChanNewUsers
 }
 
 //NewInteractor interactor
-func NewInteractor(config sensors.Auth, authRepo Repository) Interactor {
+func NewInteractor(config sensors.Auth, authRepo Repository, usersChan data.ChanNewUsers) Interactor {
 	return &interactor{
-		config:     config,
-		repository: authRepo,
+		config:      config,
+		repository:  authRepo,
+		userChannel: usersChan,
 	}
 }
 
@@ -78,7 +81,7 @@ func (i interactor) Register(user *User) (User, error) {
 		return User{}, err
 	}
 
-	// i.postNewUserToChannel(&u)
+	i.postNewUserToChannel(&u)
 	return u, nil
 }
 
@@ -90,4 +93,9 @@ func (i interactor) hashUserPassword(password []byte) (string, error) {
 	}
 
 	return string(hash), nil
+}
+
+func (i interactor) postNewUserToChannel(user *User) {
+	u := parseToNewUser(*user)
+	go func() { i.userChannel.Writer <- u }()
 }
