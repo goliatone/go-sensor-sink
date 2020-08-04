@@ -16,18 +16,18 @@ func NewErrUnexpected(err error) *ErrUnexpected {
 	}
 }
 
-//ErrUserNotFound user not found in db
-type ErrUserNotFound struct {
+//ErrRecordNotFound user not found in db
+type ErrRecordNotFound struct {
 	message string
 }
 
-func (err ErrUserNotFound) Error() string {
+func (err ErrRecordNotFound) Error() string {
 	return err.message
 }
 
-//NewErrUserNotFound creates a new ErrUserNotFound error
-func NewErrUserNotFound(message string) *ErrUserNotFound {
-	return &ErrUserNotFound{
+//NewErrRecordNotFound creates a new ErrRecordNotFound error
+func NewErrRecordNotFound(message string) *ErrRecordNotFound {
+	return &ErrRecordNotFound{
 		message: message,
 	}
 }
