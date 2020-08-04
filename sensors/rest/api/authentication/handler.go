@@ -5,7 +5,7 @@ import (
 	"sensors/auth"
 
 	"github.com/gofiber/fiber"
-	"github.com/twinj/uuid"
+	uuid "github.com/satori/go.uuid"
 )
 
 //Login will return a login handler
