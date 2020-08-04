@@ -18,13 +18,13 @@ func ErrResponse(err error) ErrHTTP {
 	var e ErrHTTP
 
 	switch err.(type) {
-	case *device.ErrDeviceNotFound:
+	case *device.ErrRecordNotFound:
 		e = ErrHTTP{
 			Error:   reflect.TypeOf(err).Name(),
 			Message: err.Error(),
 			Status:  http.StatusNotFound,
 		}
-	case *device.ErrDeviceExists:
+	case *device.ErrRecordExists:
 		e = ErrHTTP{
 			Error:   reflect.TypeOf(err).Elem().Name(),
 			Message: err.Error(),
