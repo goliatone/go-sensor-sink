@@ -7,6 +7,7 @@ import (
 	"sensors/rest/api/devices"
 	"sensors/rest/api/middleware"
 	"sensors/rest/api/readings"
+	"sensors/rest/api/users"
 
 	"github.com/gofiber/fiber"
 	// fibermiddleware "github.com/gofiber/fiber/middleware"
@@ -52,6 +53,16 @@ func Router(app *fiber.App, domain *registry.Domain, config sensors.Config) {
 	v1.Put("/device/:id", devices.Update(domain.Devices))
 	v1.Delete("/device/:id", devices.Delete(domain.Devices))
 	v1.Get("/device", devices.List(domain.Devices))
+
+	////////////////////////////////////////////////////////////
+	// User
+	////////////////////////////////////////////////////////////
+
+	v1.Post("/user", users.Create(domain.Users))
+	v1.Get("/user/:id", users.Read(domain.Users))
+	v1.Put("/user/:id", users.Update(domain.Users))
+	v1.Delete("/user/:id", users.Delete(domain.Users))
+	v1.Get("/user", users.List(domain.Users))
 
 	////////////////////////////////////////////////////////////
 	// Readings
